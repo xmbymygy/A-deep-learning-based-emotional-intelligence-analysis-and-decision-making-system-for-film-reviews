@@ -1,0 +1,1177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>影语心声 - 当代短剧情感AI分析系统</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cine: {
+                            primary: '#2A63E7',
+                            secondary: '#4FC3F7',
+                            accent: '#FF6B35',
+                            dark: '#1A202C',
+                            light: '#F8FAFC'
+                        },
+                        success: '#10B981',
+                        danger: '#EF4444',
+                        neutral: '#64748B',
+                        yellow: {
+                            100: '#FEF3C7',
+                            600: '#D97706'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .shadow-cine {
+                box-shadow: 0 10px 25px -5px rgba(42, 99, 231, 0.1), 0 8px 10px -6px rgba(42, 99, 231, 0.05);
+            }
+            .shadow-cine-lg {
+                box-shadow: 0 20px 25px -5px rgba(42, 99, 231, 0.1), 0 10px 10px -5px rgba(42, 99, 231, 0.04);
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            .text-shadow-lg {
+                text-shadow: 0 4px 8px rgba(0, 0, 0, 0.12), 0 2px 4px rgba(0, 0, 0, 0.08);
+            }
+            .transition-cine {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .bg-glass {
+                background: rgba(255, 255, 255, 0.7);
+                backdrop-filter: blur(10px);
+                -webkit-backdrop-filter: blur(10px);
+            }
+            .scale-hover {
+                transform: scale(1);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .scale-hover:hover {
+                transform: scale(1.03);
+            }
+            .animate-float {
+                animation: float 6s ease-in-out infinite;
+            }
+            @keyframes float {
+                0% { transform: translateY(0px); }
+                50% { transform: translateY(-10px); }
+                100% { transform: translateY(0px); }
+            }
+            .animate-fade-in {
+                animation: fadeIn 0.6s ease-in-out;
+            }
+            @keyframes fadeIn {
+                from { opacity: 0; transform: translateY(10px); }
+                to { opacity: 1; transform: translateY(0); }
+            }
+        }
+    </style>
+</head>
+<body class="bg-cine-light font-sans text-cine-dark">
+    <!-- 顶部导航栏 -->
+    <header class="bg-white shadow-sm fixed w-full top-0 z-50 transition-cine" id="navbar">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <i class="fa fa-film text-cine-primary text-2xl"></i>
+                    <span class="text-xl font-bold text-cine-primary">影语心声</span>
+                    <span class="ml-2 text-sm text-neutral hidden sm:inline-block">基于机器学习的情感AI分析系统</span>
+                </div>
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#home" class="text-cine-primary font-medium relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5 after:bg-cine-primary after:rounded-full">首页</a>
+                    <a href="#analysis" class="text-neutral hover:text-cine-primary transition-cine relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-cine-primary after:rounded-full after:transition-all after:duration-300 hover:after:w-full">情感分析</a>
+                    <a href="#system" class="text-neutral hover:text-cine-primary transition-cine relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-cine-primary after:rounded-full after:transition-all after:duration-300 hover:after:w-full">系统介绍</a>
+                    <a href="#scenarios" class="text-neutral hover:text-cine-primary transition-cine relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-cine-primary after:rounded-full after:transition-all after:duration-300 hover:after:w-full">应用场景</a>
+                </nav>
+                <div class="md:hidden">
+                    <button id="mobile-menu-button" class="text-neutral hover:text-cine-primary transition-cine">
+                        <i class="fa fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- 移动端菜单 -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white shadow-md">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <a href="#home" class="block px-3 py-2 rounded-md text-base font-medium text-cine-primary bg-cine-primary/5">首页</a>
+                <a href="#analysis" class="block px-3 py-2 rounded-md text-base font-medium text-neutral hover:text-cine-primary hover:bg-cine-primary/5 transition-cine">情感分析</a>
+                <a href="#system" class="block px-3 py-2 rounded-md text-base font-medium text-neutral hover:text-cine-primary hover:bg-cine-primary/5 transition-cine">系统介绍</a>
+                <a href="#scenarios" class="block px-3 py-2 rounded-md text-base font-medium text-neutral hover:text-cine-primary hover:bg-cine-primary/5 transition-cine">应用场景</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容 -->
+    <main class="container mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16">
+        <!-- 首页横幅 -->
+        <section id="home" class="mb-16">
+            <div class="bg-gradient-to-r from-cine-primary to-cine-secondary rounded-2xl p-8 md:p-16 text-white shadow-cine-lg overflow-hidden relative">
+                <!-- 装饰背景 -->
+                <div class="absolute inset-0 opacity-10">
+                    <div class="absolute -right-16 -top-16 w-64 h-64 rounded-full bg-white animate-float" style="animation-delay: 0s;"></div>
+                    <div class="absolute right-32 bottom-8 w-32 h-32 rounded-full bg-white animate-float" style="animation-delay: 1s;"></div>
+                    <div class="absolute left-20 top-1/3 w-20 h-20 rounded-full bg-white animate-float" style="animation-delay: 2s;"></div>
+                    <div class="absolute right-1/4 bottom-1/4 w-40 h-40 rounded-full bg-white animate-float" style="animation-delay: 1.5s;"></div>
+                </div>
+                
+                <!-- 动态网格背景 -->
+                <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0zNiAxOGMzLjMxNCAwIDYtMi42ODYgNi02cy0yLjY4Ni02LTYtNi02IDIuNjg2LTYgNiAyLjY4NiA2IDYgNnptMCAzMGMzLjMxNCAwIDYtMi42ODYgNi02cy0yLjY4Ni02LTYtNi02IDIuNjg2LTYgNiAyLjY4NiA2IDYgNnptLTE4IDBIMThjLTMuMzE0IDAtNiAyLjY4Ni02IDZzMi42ODYgNiA2IDYgNi0yLjY4NiA2LTYtMi42ODYtNi02LTZ6bTAgMzBjLTMuMzE0IDAtNiAyLjY4Ni02IDZzMi42ODYgNiA2IDYgNi0yLjY4NiA2LTYtMi42ODYtNi02LTZ6Ii8+PC9nPjwvc3ZnPg==')] opacity-10"></div>
+                
+                <div class="max-w-3xl relative z-10 animate-fade-in">
+                    <h1 class="text-3xl md:text-5xl font-bold mb-4 text-shadow-lg">读懂影评背后的真实情感</h1>
+                    <p class="text-lg md:text-xl opacity-90 mb-8 leading-relaxed">基于LSTM深度学习模型，精准解析电影评论情感倾向，为影视行业决策提供数据支撑</p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#analysis" class="bg-white text-cine-primary font-medium px-6 py-3 rounded-lg hover:bg-opacity-90 transition-cine flex items-center shadow-lg hover:shadow-xl scale-hover">
+                            <i class="fa fa-comment-dots mr-2"></i>开始分析
+                        </a>
+                        <a href="#system" class="bg-transparent border-2 border-white text-white font-medium px-6 py-3 rounded-lg hover:bg-white hover:bg-opacity-10 transition-cine flex items-center scale-hover">
+                            <i class="fa fa-info-circle mr-2"></i>了解系统
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 系统优势 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
+                <div class="bg-white rounded-xl p-6 shadow-cine hover:shadow-lg transition-cine transform hover:-translate-y-1">
+                    <div class="w-12 h-12 bg-cine-primary bg-opacity-10 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fa fa-brain text-cine-primary text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">AI智能解析</h3>
+                    <p class="text-neutral">采用LSTM深度学习架构，测试集准确率达82.17%，精准识别好评与差评情感倾向</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-cine hover:shadow-lg transition-cine transform hover:-translate-y-1">
+                    <div class="w-12 h-12 bg-cine-accent bg-opacity-10 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fa fa-database text-cine-accent text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">海量数据支撑</h3>
+                    <p class="text-neutral">基于22510条豆瓣电影短评数据训练，通过数据平衡技术确保模型鲁棒性与泛化能力</p>
+                </div>
+                <div class="bg-white rounded-xl p-6 shadow-cine hover:shadow-lg transition-cine transform hover:-translate-y-1">
+                    <div class="w-12 h-12 bg-success bg-opacity-10 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fa fa-lightbulb-o text-success text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">决策辅助支持</h3>
+                    <p class="text-neutral">实时输出情感分析结果，为电影制作、发行、营销提供数据驱动的决策参考依据</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 情感分析模块 -->
+        <section id="analysis" class="mb-16">
+            <div class="text-center mb-10">
+                <h2 class="text-2xl md:text-3xl font-bold mb-3">影评情感分析</h2>
+                <p class="text-neutral max-w-2xl mx-auto">输入电影评论内容，系统将基于深度学习模型实时分析情感倾向，输出精准的分类结果与概率分布</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+                <!-- 输入区域 -->
+                <div class="lg:col-span-2 bg-white rounded-xl p-6 shadow-cine">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fa fa-pencil-square-o text-cine-primary mr-2"></i>输入影评内容
+                    </h3>
+                    <form id="analysis-form" class="space-y-4">
+                        <div>
+                            <label for="review-text" class="block text-sm font-medium text-neutral mb-1">评论内容</label>
+                            <textarea id="review-text" name="review-text" rows="8" class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-cine-primary focus:border-cine-primary transition-cine outline-none" placeholder="请输入电影评论内容，例如：这部电影剧情紧凑，演员演技在线，看完很受触动，强烈推荐！"></textarea>
+                            <p id="char-count" class="text-xs text-neutral mt-1 text-right">0/500</p>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button type="submit" id="submit-btn" class="flex-1 bg-cine-primary text-white font-medium px-4 py-3 rounded-lg hover:bg-cine-primary/90 transition-cine flex items-center justify-center shadow-md hover:shadow-lg">
+                                <i class="fa fa-chart-line mr-2"></i>分析情感
+                            </button>
+                            <button type="button" id="clear-btn" class="px-4 py-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-cine">
+                                <i class="fa fa-trash-o"></i>
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- 示例评论 -->
+                    <div class="mt-6">
+                        <h4 class="text-sm font-medium text-neutral mb-2">示例评论（点击即可使用）</h4>
+                        <div class="space-y-2">
+                            <button type="button" class="example-review w-full text-left px-3 py-2 border border-gray-200 rounded-lg hover:bg-cine-primary/5 hover:border-cine-primary/30 transition-cine text-sm">
+                                这部电影剧情拖沓，演员演技生硬，全程让人尴尬，浪费时间和金钱，不推荐观看。
+                            </button>
+                            <button type="button" class="example-review w-full text-left px-3 py-2 border border-gray-200 rounded-lg hover:bg-cine-primary/5 hover:border-cine-primary/30 transition-cine text-sm">
+                                影片画面精美，配乐恰到好处，故事情节跌宕起伏，人物塑造立体，是今年必看的佳作！
+                            </button>
+                            <button type="button" class="example-review w-full text-left px-3 py-2 border border-gray-200 rounded-lg hover:bg-cine-primary/5 hover:border-cine-primary/30 transition-cine text-sm">
+                                整体中规中矩，有亮点也有不足，部分情节略显牵强，但演员表现尚可，适合闲暇时观看。
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 结果展示区域 -->
+                <div class="lg:col-span-3 bg-white rounded-xl p-6 shadow-cine">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fa fa-bar-chart text-cine-primary mr-2"></i>情感分析结果
+                    </h3>
+                    
+                    <!-- 结果加载状态 -->
+                    <div id="loading-state" class="hidden flex flex-col items-center justify-center py-16">
+                        <div class="w-12 h-12 border-4 border-cine-primary border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <p class="text-neutral">AI正在解析情感倾向，请稍候...</p>
+                    </div>
+
+                    <!-- 初始状态 -->
+                    <div id="initial-state" class="flex flex-col items-center justify-center py-16 text-center">
+                        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                            <i class="fa fa-comment-o text-gray-300 text-4xl"></i>
+                        </div>
+                        <h4 class="text-lg font-medium mb-2">等待影评输入</h4>
+                        <p class="text-neutral max-w-md">请在左侧输入电影评论内容并点击"分析情感"按钮，系统将为您实时解析评论的情感倾向</p>
+                    </div>
+
+                    <!-- 结果展示状态 -->
+                    <div id="result-state" class="hidden">
+                        <div class="mb-6">
+                            <h4 class="text-sm font-medium text-neutral mb-2">待分析评论</h4>
+                            <div id="analyzed-text" class="p-4 bg-cine-light rounded-lg text-sm border border-gray-100"></div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div class="p-4 border border-gray-200 rounded-lg bg-white hover:shadow-md transition-cine">
+                                <h4 class="text-sm font-medium text-neutral mb-2">情感分类</h4>
+                                <div class="flex items-center">
+                                    <span id="sentiment-label" class="text-lg font-bold px-3 py-1 rounded-full"></span>
+                                    <span id="confidence-score" class="ml-3 text-neutral"></span>
+                                </div>
+                            </div>
+                            <div class="p-4 border border-gray-200 rounded-lg bg-white hover:shadow-md transition-cine">
+                                <h4 class="text-sm font-medium text-neutral mb-2">分析耗时</h4>
+                                <div class="flex items-center">
+                                    <i class="fa fa-clock-o text-neutral mr-2"></i>
+                                    <span id="analysis-time" class="text-sm"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 恢复情感概率分布图表 -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4 mb-6">
+                            <h4 class="text-sm font-medium text-neutral mb-3">情感概率分布</h4>
+                            <div class="h-64">
+                                <canvas id="sentiment-chart"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- 新增：情感特征词云可视化 -->
+                        <div class="bg-white border border-gray-200 rounded-lg p-4">
+                            <h4 class="text-sm font-medium text-neutral mb-3">情感特征词分析</h4>
+                            <div class="h-48 flex flex-wrap items-center justify-center gap-2 p-4 bg-cine-light rounded-lg" id="keyword-cloud">
+                                <!-- 动态生成的关键词将在这里显示 -->
+                            </div>
+                        </div>
+
+                        <div class="mt-6 flex justify-end">
+                            <button id="new-analysis-btn" class="text-cine-primary text-sm font-medium hover:text-cine-primary/80 transition-cine flex items-center">
+                                <i class="fa fa-refresh mr-1"></i> 重新分析
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 错误状态（增强版） -->
+                    <div id="error-state" class="hidden">
+                        <div class="flex flex-col items-center justify-center py-10 text-center">
+                            <div class="w-16 h-16 bg-danger bg-opacity-10 rounded-full flex items-center justify-center mb-4">
+                                <i class="fa fa-exclamation-circle text-danger text-2xl"></i>
+                            </div>
+                            <h4 class="text-lg font-medium text-danger mb-2">分析失败</h4>
+                            <p id="error-message" class="text-neutral max-w-md mb-4">请输入有效的评论内容后再试</p>
+                            <div id="debug-info" class="text-xs text-neutral bg-gray-50 p-3 rounded-lg mb-4 hidden">
+                                <!-- 调试信息将在这里显示 -->
+                            </div>
+                            <div class="flex space-x-3">
+                                <button id="retry-btn" class="text-cine-primary text-sm font-medium hover:text-cine-primary/80 transition-cine">
+                                    重新尝试
+                                </button>
+                                <button id="show-debug-btn" class="text-neutral text-sm hover:text-cine-primary transition-cine">
+                                    查看详情
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 系统介绍 -->
+        <section id="system" class="mb-16">
+            <div class="text-center mb-10">
+                <h2 class="text-2xl md:text-3xl font-bold mb-3">系统介绍</h2>
+                <p class="text-neutral max-w-2xl mx-auto">"影语心声"基于深度学习技术构建，专注于电影评论情感分析，为用户提供精准、高效的情感识别服务</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- 系统架构 -->
+                <div class="bg-white rounded-xl p-6 shadow-cine">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fa fa-sitemap text-cine-primary mr-2"></i>系统架构设计
+                    </h3>
+                    <div class="space-y-6">
+                        <div class="relative pl-6 border-l-2 border-cine-primary">
+                            <div class="absolute left-[-9px] top-0 w-4 h-4 bg-cine-primary rounded-full"></div>
+                            <h4 class="font-medium mb-1">数据采集层</h4>
+                            <p class="text-sm text-neutral">基于requests库构建智能爬虫，从豆瓣电影热门模块采集22510条短评数据，包含完整评论内容与星级评分信息</p>
+                        </div>
+                        <div class="relative pl-6 border-l-2 border-cine-primary">
+                            <div class="absolute left-[-9px] top-0 w-4 h-4 bg-cine-primary rounded-full"></div>
+                            <h4 class="font-medium mb-1">数据预处理层</h4>
+                            <p class="text-sm text-neutral">执行数据清洗（去重、异常值处理）、文本优化（分词、去停用词）、标签转换与数据平衡操作，提升数据质量</p>
+                        </div>
+                        <div class="relative pl-6 border-l-2 border-cine-primary">
+                            <div class="absolute left-[-9px] top-0 w-4 h-4 bg-cine-primary rounded-full"></div>
+                            <h4 class="font-medium mb-1">模型计算层</h4>
+                            <p class="text-sm text-neutral">构建双LSTM层深度学习模型，结合Embedding层、Dropout层与全连接层，实现高精度情感分类</p>
+                        </div>
+                        <div class="relative pl-6 border-l-2 border-cine-primary">
+                            <div class="absolute left-[-9px] top-0 w-4 h-4 bg-cine-primary rounded-full"></div>
+                            <h4 class="font-medium mb-1">应用展示层</h4>
+                            <p class="text-sm text-neutral">基于Web技术开发用户交互界面，实现实时情感分析与结果可视化，提供直观的数据分析体验</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 模型性能（新增性能对比图表） -->
+                <div class="bg-white rounded-xl p-6 shadow-cine">
+                    <h3 class="text-xl font-bold mb-4 flex items-center">
+                        <i class="fa fa-tachometer text-cine-primary mr-2"></i>模型性能指标
+                    </h3>
+                    
+                    <!-- 新增：模型性能对比图表 -->
+                    <div class="mb-6">
+                        <h4 class="font-medium mb-3">模型准确率对比</h4>
+                        <div class="h-64">
+                            <canvas id="model-performance-chart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <h4 class="font-medium mb-3">核心模型参数配置</h4>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                                    <thead>
+                                        <tr>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-neutral uppercase tracking-wider">模型层</th>
+                                            <th class="px-4 py-2 text-left text-xs font-medium text-neutral uppercase tracking-wider">参数配置</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-4 py-2 font-medium">Embedding层</td>
+                                            <td class="px-4 py-2 text-neutral">输入维度:10000, 输出维度:256</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 font-medium">LSTM层(第一层)</td>
+                                            <td class="px-4 py-2 text-neutral">单元数:128, 返回序列:是</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 font-medium">LSTM层(第二层)</td>
+                                            <td class="px-4 py-2 text-neutral">单元数:64, 返回序列:否</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 font-medium">Dropout层</td>
+                                            <td class="px-4 py-2 text-neutral">丢弃率:0.5（防止过拟合）</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 font-medium">全连接层</td>
+                                            <td class="px-4 py-2 text-neutral">单元数:16, 激活函数:ReLU</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2 font-medium">输出层</td>
+                                            <td class="px-4 py-2 text-neutral">单元数:2, 激活函数:Sigmoid</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 数据处理流程（新增数据分布图表） -->
+            <div class="mt-8 bg-white rounded-xl p-6 shadow-cine">
+                <h3 class="text-xl font-bold mb-4 flex items-center">
+                    <i class="fa fa-random text-cine-primary mr-2"></i>数据处理流程
+                </h3>
+                
+                <!-- 新增：数据分布图表 -->
+                <div class="mb-8">
+                    <h4 class="font-medium mb-3">数据集情感分布</h4>
+                    <div class="h-64">
+                        <canvas id="data-distribution-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <!-- 流程线 -->
+                    <div class="absolute left-0 md:left-1/2 top-0 bottom-0 w-0.5 bg-gray-200 transform md:-translate-x-1/2"></div>
+                    
+                    <!-- 流程步骤 -->
+                    <div class="space-y-12 relative">
+                        <!-- 步骤1 -->
+                        <div class="relative flex flex-col md:flex-row items-start">
+                            <div class="absolute left-0 md:left-1/2 w-4 h-4 bg-cine-primary rounded-full transform md:-translate-x-1/2 z-10"></div>
+                            <div class="md:w-1/2 md:pr-12 md:text-right order-2 md:order-1 mt-4 md:mt-0">
+                                <h4 class="font-medium mb-1">数据采集</h4>
+                                <p class="text-sm text-neutral">从豆瓣电影热门模块采集短评数据，包含完整评论内容和星级评分，共获取22510条原始数据</p>
+                            </div>
+                            <div class="md:w-1/2 md:pl-12 order-1 md:order-2">
+                                <div class="bg-cine-light p-3 rounded-lg inline-block shadow-sm">
+                                    <i class="fa fa-download text-cine-primary mr-1"></i> 豆瓣热门电影短评采集
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 步骤2 -->
+                        <div class="relative flex flex-col md:flex-row items-start">
+                            <div class="absolute left-0 md:left-1/2 w-4 h-4 bg-cine-primary rounded-full transform md:-translate-x-1/2 z-10"></div>
+                            <div class="md:w-1/2 md:pr-12 order-1">
+                                <div class="bg-cine-light p-3 rounded-lg inline-block shadow-sm">
+                                    <i class="fa fa-filter text-cine-primary mr-1"></i> 数据清洗与预处理
+                                </div>
+                            </div>
+                            <div class="md:w-1/2 md:pl-12 order-2 mt-4 md:mt-0">
+                                <h4 class="font-medium mb-1">数据清洗</h4>
+                                <p class="text-sm text-neutral">处理空值、重复值和异常值，移除非中文字符和特殊符号，最终得到18937条有效数据</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 步骤3 -->
+                        <div class="relative flex flex-col md:flex-row items-start">
+                            <div class="absolute left-0 md:left-1/2 w-4 h-4 bg-cine-primary rounded-full transform md:-translate-x-1/2 z-10"></div>
+                            <div class="md:w-1/2 md:pr-12 md:text-right order-2 md:order-1 mt-4 md:mt-0">
+                                <h4 class="font-medium mb-1">文本优化</h4>
+                                <p class="text-sm text-neutral">使用jieba分词进行中文精准分词，基于自定义停用词表移除无用词汇，提升文本数据质量</p>
+                            </div>
+                            <div class="md:w-1/2 md:pl-12 order-1 md:order-2">
+                                <div class="bg-cine-light p-3 rounded-lg inline-block shadow-sm">
+                                    <i class="fa fa-font text-cine-primary mr-1"></i> 分词与去停用词
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 步骤4 -->
+                        <div class="relative flex flex-col md:flex-row items-start">
+                            <div class="absolute left-0 md:left-1/2 w-4 h-4 bg-cine-primary rounded-full transform md:-translate-x-1/2 z-10"></div>
+                            <div class="md:w-1/2 md:pr-12 order-1">
+                                <div class="bg-cine-light p-3 rounded-lg inline-block shadow-sm">
+                                    <i class="fa fa-balance-scale text-cine-primary mr-1"></i> 标签转换与数据平衡
+                                </div>
+                            </div>
+                            <div class="md:w-1/2 md:pl-12 order-2 mt-4 md:mt-0">
+                                <h4 class="font-medium mb-1">数据平衡</h4>
+                                <p class="text-sm text-neutral">将1-2星标记为差评(0)，3-5星标记为好评(1)，通过过采样和欠采样技术平衡数据，最终各10000条样本</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 步骤5 -->
+                        <div class="relative flex flex-col md:flex-row items-start">
+                            <div class="absolute left-0 md:left-1/2 w-4 h-4 bg-cine-primary rounded-full transform md:-translate-x-1/2 z-10"></div>
+                            <div class="md:w-1/2 md:pr-12 md:text-right order-2 md:order-1 mt-4 md:mt-0">
+                                <h4 class="font-medium mb-1">文本向量化</h4>
+                                <p class="text-sm text-neutral">使用Keras Tokenizer将文本转换为数值序列，通过pad_sequences统一序列长度，为模型输入做准备</p>
+                            </div>
+                            <div class="md:w-1/2 md:pl-12 order-1 md:order-2">
+                                <div class="bg-cine-light p-3 rounded-lg inline-block shadow-sm">
+                                    <i class="fa fa-exchange text-cine-primary mr-1"></i> 文本转数值序列
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 应用场景 -->
+        <section id="scenarios">
+            <div class="text-center mb-10">
+                <h2 class="text-2xl md:text-3xl font-bold mb-3">多元应用场景</h2>
+                <p class="text-neutral max-w-2xl mx-auto">"影语心声"不仅适用于电影行业，还可扩展到多个领域，为不同用户提供专业的情感分析服务</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- 场景1 -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-cine hover:shadow-lg transition-cine transform hover:-translate-y-1">
+                    <div class="h-40 bg-gradient-to-r from-cine-primary to-cine-secondary flex items-center justify-center">
+                        <i class="fa fa-film text-white text-4xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">影视行业决策支持</h3>
+                        <p class="text-neutral text-sm mb-4">为电影制作方、发行方提供观众情感反馈，优化营销策略，调整发行计划，精准评估市场反响</p>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>实时监控电影口碑动态变化</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>深度分析观众偏好与情感需求</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>科学评估营销活动实际效果</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 场景2 -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-cine hover:shadow-lg transition-cine transform hover:-translate-y-1">
+                    <div class="h-40 bg-gradient-to-r from-success to-emerald-400 flex items-center justify-center">
+                        <i class="fa fa-thumbs-up text-white text-4xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">个性化推荐系统</h3>
+                        <p class="text-neutral text-sm mb-4">集成到电影平台推荐系统，基于用户评论情感分析，提供个性化电影推荐，提升用户体验</p>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>精准捕捉用户情感偏好特征</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>优化推荐算法精度与效果</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>提高用户平台粘性与留存率</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 场景3 -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-cine hover:shadow-lg transition-cine transform hover:-translate-y-1">
+                    <div class="h-40 bg-gradient-to-r from-cine-accent to-orange-400 flex items-center justify-center">
+                        <i class="fa fa-comments text-white text-4xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">社交媒体舆情监控</h3>
+                        <p class="text-neutral text-sm mb-4">监控社交媒体平台电影相关讨论，及时发现负面舆论，维护品牌形象，引导公众情绪</p>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>实时追踪影视舆情动态</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>负面信息智能预警与处理</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>维护影视品牌良好形象</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 场景4 -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-cine hover:shadow-lg transition-cine transform hover:-translate-y-1">
+                    <div class="h-40 bg-gradient-to-r from-indigo-500 to-purple-400 flex items-center justify-center">
+                        <i class="fa fa-line-chart text-white text-4xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">影视市场研究分析</h3>
+                        <p class="text-neutral text-sm mb-4">为市场研究机构提供电影行业情感数据，分析市场趋势，预测票房表现，支持投资决策</p>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>深度分析影视行业趋势</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>科学预测电影票房表现</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>提供影视投资风险评估</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 场景5 -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-cine hover:shadow-lg transition-cine transform hover:-translate-y-1">
+                    <div class="h-40 bg-gradient-to-r from-amber-500 to-yellow-400 flex items-center justify-center">
+                        <i class="fa fa-graduation-cap text-white text-4xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">学术研究与教育</h3>
+                        <p class="text-neutral text-sm mb-4">作为情感分析教学案例，帮助学生理解深度学习在自然语言处理中的应用，培养数据分析能力</p>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>提供情感分析教学演示</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>搭建NLP研究实验平台</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>培养数据分析实践能力</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- 场景6 -->
+                <div class="bg-white rounded-xl overflow-hidden shadow-cine hover:shadow-lg transition-cine transform hover:-translate-y-1">
+                    <div class="h-40 bg-gradient-to-r from-rose-500 to-pink-400 flex items-center justify-center">
+                        <i class="fa fa-shield text-white text-4xl"></i>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-2">公共舆情安全监测</h3>
+                        <p class="text-neutral text-sm mb-4">在特殊时期监控公众情绪变化，及时发现潜在社会风险，为政府部门提供舆情决策支持</p>
+                        <ul class="space-y-2 text-sm">
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>实时监测社会情绪动态</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>潜在风险智能预警支持</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa fa-check-circle text-success mt-1 mr-2"></i>
+                                <span>辅助应急决策与处置</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-white border-t border-gray-200">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div class="md:col-span-2">
+                    <div class="flex items-center mb-4">
+                        <i class="fa fa-film text-cine-primary text-2xl mr-3"></i>
+                        <span class="text-xl font-bold text-cine-primary">影语心声</span>
+                    </div>
+                    <p class="text-neutral text-sm mb-4">基于深度学习的影评情感智能分析系统，通过LSTM模型实现精准的情感识别，为电影产业提供数据驱动的决策支持，助力影视行业高质量发展。</p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-8 h-8 rounded-full bg-cine-light flex items-center justify-center text-neutral hover:bg-cine-primary hover:text-white transition-cine">
+                            <i class="fa fa-github"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-cine-light flex items-center justify-center text-neutral hover:bg-cine-primary hover:text-white transition-cine">
+                            <i class="fa fa-linkedin"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-cine-light flex items-center justify-center text-neutral hover:bg-cine-primary hover:text-white transition-cine">
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-8 h-8 rounded-full bg-cine-light flex items-center justify-center text-neutral hover:bg-cine-primary hover:text-white transition-cine">
+                            <i class="fa fa-weixin"></i>
+                        </a>
+                    </div>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">快速导航</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="#home" class="text-neutral hover:text-cine-primary transition-cine">首页</a></li>
+                        <li><a href="#analysis" class="text-neutral hover:text-cine-primary transition-cine">情感分析</a></li>
+                        <li><a href="#system" class="text-neutral hover:text-cine-primary transition-cine">系统介绍</a></li>
+                        <li><a href="#scenarios" class="text-neutral hover:text-cine-primary transition-cine">应用场景</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold mb-4">联系我们</h4>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start">
+                            <i class="fa fa-envelope text-neutral mt-1 mr-2"></i>
+                            <span class="text-neutral">contact@moviefeel.ai</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-phone text-neutral mt-1 mr-2"></i>
+                            <span class="text-neutral">+86 123 4567 8910</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fa fa-map-marker text-neutral mt-1 mr-2"></i>
+                            <span class="text-neutral">北京市海淀区中关村科技园区</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="mt-8 pt-8 border-t border-gray-200 text-center text-sm text-neutral">
+                <p>© 2025 影语心声 - 影评情感智能分析系统. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 全局图表对象
+        let sentimentChart, modelPerformanceChart, dataDistributionChart;
+        
+        // 移动端菜单切换
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 10) {
+                navbar.classList.add('shadow-md');
+                navbar.classList.remove('shadow-sm');
+            } else {
+                navbar.classList.remove('shadow-md');
+                navbar.classList.add('shadow-sm');
+            }
+        });
+
+        // 字符计数
+        const reviewText = document.getElementById('review-text');
+        const charCount = document.getElementById('char-count');
+        
+        reviewText.addEventListener('input', function() {
+            const length = this.value.length;
+            charCount.textContent = `${length}/500`;
+            
+            if (length > 500) {
+                charCount.classList.add('text-danger');
+                this.value = this.value.substring(0, 500);
+                charCount.textContent = '500/500';
+            } else {
+                charCount.classList.remove('text-danger');
+            }
+        });
+
+        // 示例评论点击
+        document.querySelectorAll('.example-review').forEach(button => {
+            button.addEventListener('click', function() {
+                reviewText.value = this.textContent;
+                reviewText.dispatchEvent(new Event('input'));
+            });
+        });
+
+        // 清除按钮
+        document.getElementById('clear-btn').addEventListener('click', function() {
+            reviewText.value = '';
+            reviewText.dispatchEvent(new Event('input'));
+            showInitialState();
+        });
+
+        // 重新分析按钮
+        document.getElementById('new-analysis-btn').addEventListener('click', function() {
+            reviewText.value = '';
+            reviewText.dispatchEvent(new Event('input'));
+            showInitialState();
+            reviewText.focus();
+        });
+
+        // 重试按钮
+        document.getElementById('retry-btn').addEventListener('click', function() {
+            showInitialState();
+            reviewText.focus();
+        });
+
+        // 显示调试信息
+        document.getElementById('show-debug-btn').addEventListener('click', function() {
+            const debugInfo = document.getElementById('debug-info');
+            debugInfo.classList.toggle('hidden');
+            this.textContent = debugInfo.classList.contains('hidden') ? '查看详情' : '隐藏详情';
+        });
+
+        // 状态切换函数
+        function showInitialState() {
+            document.getElementById('initial-state').classList.remove('hidden');
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('result-state').classList.add('hidden');
+            document.getElementById('error-state').classList.add('hidden');
+        }
+
+        function showLoadingState() {
+            document.getElementById('initial-state').classList.add('hidden');
+            document.getElementById('loading-state').classList.remove('hidden');
+            document.getElementById('result-state').classList.add('hidden');
+            document.getElementById('error-state').classList.add('hidden');
+        }
+
+        function showResultState() {
+            document.getElementById('initial-state').classList.add('hidden');
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('result-state').classList.remove('hidden');
+            document.getElementById('error-state').classList.add('hidden');
+        }
+
+        function showErrorState(message, debugDetails) {
+            document.getElementById('initial-state').classList.add('hidden');
+            document.getElementById('loading-state').classList.add('hidden');
+            document.getElementById('result-state').classList.add('hidden');
+            document.getElementById('error-state').classList.remove('hidden');
+            document.getElementById('error-message').textContent = message || '请输入有效的评论内容后再试';
+            
+            // 显示调试信息
+            const debugInfo = document.getElementById('debug-info');
+            if (debugDetails) {
+                debugInfo.textContent = `调试信息: ${debugDetails}`;
+                debugInfo.classList.remove('hidden');
+            } else {
+                debugInfo.classList.add('hidden');
+            }
+        }
+
+        // 生成关键词云
+        function generateKeywordCloud(keywords) {
+            const container = document.getElementById('keyword-cloud');
+            container.innerHTML = '';
+            
+            keywords.forEach(item => {
+                const span = document.createElement('span');
+                // 根据情感分数设置颜色和大小
+                let color, size;
+                if (item.score > 0.6) {
+                    color = 'text-success';
+                    size = item.score > 0.8 ? 'text-xl font-bold' : 'text-base font-medium';
+                } else if (item.score < 0.4) {
+                    color = 'text-danger';
+                    size = item.score < 0.2 ? 'text-xl font-bold' : 'text-base font-medium';
+                } else {
+                    color = 'text-yellow-600';
+                    size = 'text-sm';
+                }
+                span.className = `px-2 py-1 rounded-full bg-white shadow-sm ${color} ${size} m-1 transition-cine hover:scale-110`;
+                span.textContent = item.word;
+                container.appendChild(span);
+            });
+        }
+
+        // 表单提交处理（修复API调用问题）
+        document.getElementById('analysis-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const text = reviewText.value.trim();
+            
+            if (!text) {
+                showErrorState('请输入电影评论内容');
+                return;
+            }
+            
+            if (text.length < 5) {
+                showErrorState('评论内容过短，请输入至少5个字符');
+                return;
+            }
+            
+            // 记录开始时间用于计算耗时
+            const startTime = performance.now();
+            
+            // 显示加载状态
+            showLoadingState();
+            
+            try {
+                // 修复1：API地址自动适配（如果后端地址不同，请修改此处）
+                const apiUrl = "/api/predict/"; // 使用相对路径避免跨域问题
+                
+                // 修复2：更健壮的请求处理
+                const response = await fetch(apiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCSRFToken() // 添加CSRF令牌（Django需要）
+                    },
+                    body: JSON.stringify({ comment: text })
+                });
+                
+                // 修复3：详细的错误处理
+                if (!response.ok) {
+                    const errorDetails = await response.text().catch(() => '无法获取错误详情');
+                    throw new Error(`HTTP错误: ${response.status} - ${errorDetails}`);
+                }
+                
+                // 解析响应
+                const apiResult = await response.json();
+                
+                // 验证响应格式
+                if (!apiResult || !apiResult["预测结果"] || !apiResult["三类概率"]) {
+                    throw new Error("API返回格式不正确，缺少必要字段");
+                }
+                
+                // 显示原始评论
+                document.getElementById('analyzed-text').textContent = text;
+                
+                // 处理情感标签和置信度
+                const sentimentLabel = document.getElementById('sentiment-label');
+                const confidenceScore = document.getElementById('confidence-score');
+                const sentiment = apiResult["预测结果"];
+                const confidence = apiResult["置信度"];
+                
+                // 设置情感标签样式
+                if (sentiment === "好评") {
+                    sentimentLabel.textContent = "好评";
+                    sentimentLabel.className = "text-lg font-bold px-3 py-1 rounded-full bg-success bg-opacity-10 text-success";
+                } else if (sentiment === "中评") {
+                    sentimentLabel.textContent = "中评";
+                    sentimentLabel.className = "text-lg font-bold px-3 py-1 rounded-full bg-yellow-100 text-yellow-600";
+                } else {
+                    sentimentLabel.textContent = "差评";
+                    sentimentLabel.className = "text-lg font-bold px-3 py-1 rounded-full bg-danger bg-opacity-10 text-danger";
+                }
+                confidenceScore.textContent = `置信度: ${confidence}`;
+                
+                // 设置分析时间
+                const duration = ((performance.now() - startTime)/1000).toFixed(2);
+                const now = new Date();
+                const timeString = now.toLocaleTimeString('zh-CN', {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+                document.getElementById('analysis-time').textContent = `${timeString} (耗时: ${duration}s)`;
+                
+                // 绘制情感概率图表
+                const ctx = document.getElementById('sentiment-chart').getContext('2d');
+                
+                // 销毁已有图表
+                if (sentimentChart) {
+                    sentimentChart.destroy();
+                }
+                
+                // 提取三类概率
+                const negativeProb = parseFloat(apiResult["三类概率"]["差评"].replace('%', ''));
+                const neutralProb = parseFloat(apiResult["三类概率"]["中评"].replace('%', ''));
+                const positiveProb = parseFloat(apiResult["三类概率"]["好评"].replace('%', ''));
+                
+                // 创建图表
+                sentimentChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['差评', '中评', '好评'],
+                        datasets: [{
+                            label: '情感概率',
+                            data: [negativeProb, neutralProb, positiveProb],
+                            backgroundColor: [
+                                sentiment === "差评" ? '#EF4444' : 'rgba(239, 68, 68, 0.6)',
+                                sentiment === "中评" ? '#F59E0B' : 'rgba(245, 158, 11, 0.6)',
+                                sentiment === "好评" ? '#10B981' : 'rgba(16, 185, 129, 0.6)'
+                            ],
+                            borderColor: [
+                                '#EF4444',
+                                '#F59E0B',
+                                '#10B981'
+                            ],
+                            borderWidth: 1,
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100,
+                                ticks: {
+                                    callback: function(value) {
+                                        return value + '%';
+                                    }
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        animation: { duration: 800 }
+                    }
+                });
+                
+                // 生成关键词云（模拟数据，实际项目中应由API返回）
+                const sampleKeywords = [
+                    { word: "剧情", score: sentiment === "好评" ? 0.85 : 0.25 },
+                    { word: "演员", score: sentiment === "好评" ? 0.9 : 0.3 },
+                    { word: "画面", score: 0.7 },
+                    { word: "节奏", score: sentiment === "好评" ? 0.6 : 0.15 },
+                    { word: "配乐", score: 0.55 },
+                    { word: "结尾", score: sentiment === "好评" ? 0.75 : 0.2 },
+                    { word: "台词", score: 0.45 },
+                    { word: "特效", score: 0.65 }
+                ];
+                generateKeywordCloud(sampleKeywords);
+                
+                // 显示结果
+                showResultState();
+                
+            } catch (error) {
+                // 详细错误信息展示
+                let userMessage, debugDetails;
+                
+                if (error.message.includes("Failed to fetch")) {
+                    userMessage = "无法连接到后端服务，请检查服务器是否已启动";
+                    debugDetails = "可能原因：1. Django服务器未运行 2. API地址错误 3. 跨域问题";
+                } else if (error.message.includes("CSRF")) {
+                    userMessage = "安全验证失败，请刷新页面后重试";
+                    debugDetails = "CSRF令牌获取失败，可能是会话过期";
+                } else {
+                    userMessage = "情感分析过程中出现错误";
+                    debugDetails = error.message;
+                }
+                
+                showErrorState(userMessage, debugDetails);
+                console.error('分析错误:', error);
+            }
+        });
+
+        // 获取Django CSRF令牌（修复跨站请求问题）
+        function getCSRFToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 10) === 'csrftoken=') {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    document.getElementById('mobile-menu').classList.add('hidden');
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // 初始化页面图表
+        function initCharts() {
+            // 1. 模型性能对比图表
+            const perfCtx = document.getElementById('model-performance-chart').getContext('2d');
+            modelPerformanceChart = new Chart(perfCtx, {
+                type: 'line',
+                data: {
+                    labels: ['1', '2', '3', '4', '5'],
+                    datasets: [
+                        {
+                            label: 'LSTM模型（本系统）',
+                            data: [72.3, 76.8, 79.5, 81.2, 82.17],
+                            borderColor: '#2A63E7',
+                            backgroundColor: 'rgba(42, 99, 231, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: '朴素贝叶斯',
+                            data: [65.2, 67.5, 68.1, 68.3, 68.5],
+                            borderColor: '#64748B',
+                            backgroundColor: 'rgba(100, 116, 139, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        },
+                        {
+                            label: 'SVM模型',
+                            data: [68.5, 70.2, 71.3, 71.5, 71.8],
+                            borderColor: '#F59E0B',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: { display: true, text: '准确率 (%)' },
+                            min: 60,
+                            max: 90
+                        },
+                        x: {
+                            title: { display: true, text: '训练周期 (Epochs)' }
+                        }
+                    },
+                    plugins: {
+                        tooltip: { mode: 'index', intersect: false }
+                    }
+                }
+            });
+
+            // 2. 数据分布图表
+            const dataCtx = document.getElementById('data-distribution-chart').getContext('2d');
+            dataDistributionChart = new Chart(dataCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['原始差评', '原始好评', '平衡后差评', '平衡后好评'],
+                    datasets: [{
+                        data: [6500, 16010, 10000, 10000],
+                        backgroundColor: [
+                            'rgba(239, 68, 68, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(239, 68, 68, 0.4)',
+                            'rgba(16, 185, 129, 0.4)'
+                        ],
+                        borderColor: [
+                            'rgba(239, 68, 68, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(239, 68, 68, 0.6)',
+                            'rgba(16, 185, 129, 0.6)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' },
+                        title: {
+                            display: true,
+                            text: '数据平衡前后对比 (样本数)'
+                        }
+                    }
+                }
+            });
+        }
+
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', function() {
+            showInitialState();
+            initCharts(); // 初始化所有图表
+            
+            // 设置当前年份
+            const yearElement = document.querySelector('footer .text-center p');
+            if (yearElement) {
+                const currentYear = new Date().getFullYear();
+                yearElement.textContent = `© ${currentYear} 影语心声 - 影评情感智能分析系统. 保留所有权利.`;
+            }
+        });
+    </script>
+</body>
+</html>
